@@ -26,13 +26,23 @@ class AppointmentController extends Controller
             'end_time' => 'required|date|after:start_time',
         ]);
 
-        Appointment::create($request->all());
+        $appointment = Appointment::create($request->all());
+
+        if ($request->ajax()) {
+            return response()->json(['message' => 'Agendamento criado com sucesso!', 'appointment' => $appointment], 200);
+        }
+
         return redirect()->route('appointments.index')->with('success', 'Agendamento criado com sucesso!');
     }
 
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['message' => 'Agendamento excluído com sucesso!'], 200);
+        }
+
         return redirect()->route('appointments.index')->with('success', 'Agendamento excluído com sucesso!');
     }
 
