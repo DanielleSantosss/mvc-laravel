@@ -51,4 +51,33 @@ class AppointmentController extends Controller
         $appointments = Appointment::where('start_time', '>', now())->get();
         return view('appointments.pendents', compact('appointments'));
     }
+
+    public function edit($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        return view('appointments.edit', compact('appointment'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after_or_equal:start_time',
+        ]);
+
+        $appointment = Appointment::findOrFail($id);
+        $appointment->title = $request->input('title');
+        $appointment->description = $request->input('description');
+        $appointment->start_time = $request->input('start_time');
+        $appointment->end_time = $request->input('end_time');
+        $appointment->save();
+
+        if ($request->ajax()) {
+            return response()->json(['message' => 'Agendamento atualizado com sucesso!', 'appointment' => $appointment], 200);
+        }
+
+        return redirect()->route('appointments.index')->with('success', 'Agendamento atualizado com sucesso!');
+    }
 }
